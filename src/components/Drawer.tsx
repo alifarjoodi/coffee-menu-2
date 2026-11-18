@@ -1,6 +1,8 @@
 import { useLayoutEffect, useRef, type ReactNode } from 'react'
 import { X } from 'lucide-react'
 import { Rosette } from './Brand'
+import { Button } from '@/components/ui/button'
+import { useDrawerMotion } from '../hooks/motion'
 
 export function Drawer({
   open,
@@ -15,6 +17,8 @@ export function Drawer({
 }) {
   const dialog = useRef<HTMLDialogElement>(null)
   const titleAnchor = useRef<HTMLDivElement>(null)
+  const shell = useRef<HTMLDivElement>(null)
+  useDrawerMotion(shell, open, section, dialog)
   useLayoutEffect(() => {
     const node = dialog.current
     if (!node) return
@@ -48,7 +52,7 @@ export function Drawer({
           onClose()
       }}
     >
-      <div className="drawer-shell">
+      <div className="drawer-shell" ref={shell}>
         <div className="drawer-bar" ref={titleAnchor} tabIndex={-1}>
           <span className="drawer-imprint">
             <Rosette />
@@ -56,9 +60,15 @@ export function Drawer({
               DANEH COFFEE HOUSE
             </span>
           </span>
-          <button className="icon-btn close-drawer" onClick={onClose} aria-label="بستن پنل">
-            <X size={19} />
-          </button>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="close-drawer rounded-full"
+            onClick={onClose}
+            aria-label="بستن پنل"
+          >
+            <X />
+          </Button>
         </div>
         {children}
       </div>
