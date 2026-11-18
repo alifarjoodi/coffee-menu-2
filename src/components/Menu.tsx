@@ -265,6 +265,8 @@ export function Menu({ onPick }: { onPick: PickDrink }) {
   const [query, setQuery] = useState('')
   const [mobileSearch, setMobileSearch] = useState(false)
   const input = useRef<HTMLInputElement>(null)
+  const searchField = useRef<HTMLDivElement>(null)
+  const searchToggle = useRef<HTMLButtonElement>(null)
   const board = useRef<HTMLDivElement>(null)
   const pendingFlip = useRef<Flip.FlipState | null>(null)
   const needle = normalize(query)
@@ -373,10 +375,18 @@ export function Menu({ onPick }: { onPick: PickDrink }) {
     input.current?.focus()
   }
 
-  function toggleSearch() {
-    setMobileSearch(!mobileSearch)
-    if (!mobileSearch) requestAnimationFrame(() => input.current?.focus())
-  }
+  useGSAP(() => {
+    if (!mobileSearch || !searchField.current) return
+    const mm = gsap.matchMedia()
+    mm.add('(max-width: 740px) and (prefers-reduced-motion: no-preference)', () => {
+      gsap.from(searchField.current, { opacity: 0, y: -6, duration: 0.24, ease: 'power2.out' })
+    })
+    return () => mm.revert()
+  }, { dependencies: [mobileSearch], revertOnUpdate: true })
+
+  useLayoutEffect(() => {
+    if (mobileSearch) input.current?.focus()
+  }, [mobileSearch])
 
   return (
     <div id="menu" className="menu-area" ref={board}>
@@ -401,45 +411,52 @@ export function Menu({ onPick }: { onPick: PickDrink }) {
             </ToggleGroupItem>
           ))}
         </ToggleGroup>
-        <div className="toolbar-search">
-          <span className="search-field">
-            <Search size={19} strokeWidth={1.6} />
-            <Input
-              ref={input}
-              type="search"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              aria-label="جست‌وجو در منو"
-              placeholder="جست‌وجو در منو..."
-              autoComplete="off"
-            />
-            {query && (
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon-sm"
-                className="search-clear"
-                onClick={() => {
-                  setQuery('')
-                  input.current?.focus()
-                }}
-                aria-label="پاک کردن جست‌وجو"
-              >
-                <X />
-              </Button>
-            )}
-          </span>
-          <Button
-            type="button"
-            variant="outline"
-            size="icon"
-            className="mobile-search-toggle"
-            aria-expanded={mobileSearch}
-            aria-label="باز و بسته کردن جست‌وجو"
-            onClick={toggleSearch}
-          >
-            {mobileSearch ? <X /> : <Search />}
-          </Button>
+        <Button
+          ref={searchToggle}
+          type="button"
+          variant="ghost"
+          size="icon"
+          className="mobile-search-toggle"
+          aria-expanded={mobileSearch}
+          aria-controls="menu-search"
+          aria-label={mobileSearch ? 'بستن جست‌وجو' : 'باز کردن جست‌وجو'}
+          onClick={() => setMobileSearch((open) => !open)}
+        >
+          {mobileSearch ? <X /> : <Search />}
+        </Button>
+        <div id="menu-search" role="search" className="search-field" ref={searchField}>
+          <Search size={19} strokeWidth={1.7} aria-hidden="true" />
+          <Input
+            ref={input}
+            type="search"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Escape' && mobileSearch && matchMedia('(max-width: 740px)').matches) {
+                e.preventDefault()
+                setMobileSearch(false)
+                searchToggle.current?.focus()
+              }
+            }}
+            aria-label="جست‌وجو در منو"
+            placeholder="جست‌وجو در منو…"
+            autoComplete="off"
+          />
+          {query && (
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon-sm"
+              className="search-clear"
+              onClick={() => {
+                morph(() => setQuery(''))
+                input.current?.focus()
+              }}
+              aria-label="پاک کردن جست‌وجو"
+            >
+              <X />
+            </Button>
+          )}
         </div>
       </div>
       <p className="sr-only" aria-live="polite" role="status">
