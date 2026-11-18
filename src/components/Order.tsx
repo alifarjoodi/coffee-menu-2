@@ -14,6 +14,9 @@ import {
 import { numberFA, sizeName, type Drink, type DrinkSize } from '../menu'
 import { MAX_QUANTITY, itemKey, resolveItem, type CartItem, type Receipt } from '../order'
 import { BeanMark } from './Brand'
+import { Button } from '@/components/ui/button'
+import { Separator } from '@/components/ui/separator'
+import { Badge } from '@/components/ui/badge'
 
 export function Price({ value }: { value: number }) {
   return (
@@ -35,23 +38,29 @@ function Stepper({
 }) {
   return (
     <div className="stepper" dir="ltr" role="group" aria-label={`تعداد ${name}`}>
-      <button
+      <Button
+        variant="ghost"
+        size="icon-sm"
+        className="stepper-btn"
         aria-label={`کم کردن تعداد ${name}`}
         disabled={quantity <= 1}
         onClick={() => onChange(quantity - 1)}
       >
-        <Minus size={16} />
-      </button>
+        <Minus />
+      </Button>
       <output aria-live="polite" aria-atomic="true" key={quantity}>
         {numberFA(quantity)}
       </output>
-      <button
+      <Button
+        variant="ghost"
+        size="icon-sm"
+        className="stepper-btn"
         aria-label={`زیاد کردن تعداد ${name}`}
         disabled={quantity >= max}
         onClick={() => onChange(quantity + 1)}
       >
-        <Plus size={16} />
-      </button>
+        <Plus />
+      </Button>
     </div>
   )
 }
@@ -99,11 +108,11 @@ export function ProductView({
           <h3>درباره‌ی نوشیدنی</h3>
           <p>{drink.description}</p>
           <div className="detail-tags">
-            <span>
-              {drink.cold ? <Snowflake size={13} /> : <Flame size={13} />}
+            <Badge variant={drink.cold ? 'cold' : 'warm'}>
+              {drink.cold ? <Snowflake /> : <Flame />}
               {drink.cold ? 'سرد' : 'گرم'}
-            </span>
-            <span>{numberFA(size.ml)} میلی‌لیتر</span>
+            </Badge>
+            <Badge variant="default">{numberFA(size.ml)} میلی‌لیتر</Badge>
           </div>
         </div>
         {drink.sizes.length > 1 ? (
@@ -143,19 +152,23 @@ export function ProductView({
         {remaining === 0 ? (
           <>
             <p className="limit-note">حداکثر تعداد این نوشیدنی در سفارش انتخاب شده است.</p>
-            <button className="primary-action" onClick={onCart}>
+            <Button className="primary-action w-full" size="lg" onClick={onCart}>
               مشاهده سفارش من
-              <ArrowLeft size={17} />
-            </button>
+              <ArrowLeft />
+            </Button>
           </>
         ) : (
-          <button className="primary-action" onClick={() => onAdd(sizeId, quantity)}>
+          <Button
+            className="primary-action w-full"
+            size="lg"
+            onClick={() => onAdd(sizeId, quantity)}
+          >
             <span>
-              <ShoppingBag size={17} />
+              <ShoppingBag />
               افزودن به سفارش
             </span>
             <Price value={size.price * quantity} />
-          </button>
+          </Button>
         )}
       </div>
     </>
@@ -217,13 +230,15 @@ export function CartView({
                           {numberFA(size.ml)} میلی‌لیتر
                         </p>
                       </div>
-                      <button
-                        className="icon-btn remove-item"
+                      <Button
+                        variant="ghost"
+                        size="icon-sm"
+                        className="remove-item rounded-full"
                         onClick={() => onRemove(key)}
                         aria-label={`حذف ${drink.name} ${sizeName[line.sizeId]}`}
                       >
-                        <Trash2 size={15} />
-                      </button>
+                        <Trash2 />
+                      </Button>
                     </div>
                     <div className="line-total">
                       <Price value={size.price * line.quantity} />
@@ -237,10 +252,10 @@ export function CartView({
                 )
               })}
             </ul>
-            <button className="text-action" onClick={onClose}>
-              <Plus size={15} />
+            <Button variant="link" className="text-action" onClick={onClose}>
+              <Plus />
               انتخاب نوشیدنی دیگر
-            </button>
+            </Button>
           </>
         ) : (
           <div className="empty-cart">
@@ -249,32 +264,33 @@ export function CartView({
             </div>
             <h3>سفارش شما هنوز خالی است</h3>
             <p>از منو یک نوشیدنی انتخاب کنید و آن را به سفارش خود اضافه کنید.</p>
-            <button onClick={onClose} className="outline-button">
+            <Button variant="outline" size="lg" className="rounded-full" onClick={onClose}>
               مشاهده‌ی منو
-              <ArrowLeft size={15} />
-            </button>
+              <ArrowLeft />
+            </Button>
             {lastReceipt && (
-              <button onClick={onReceipt} className="text-action">
-                <ReceiptText size={15} />
+              <Button variant="link" onClick={onReceipt} className="text-action">
+                <ReceiptText />
                 مشاهده‌ی آخرین رسید
-              </button>
+              </Button>
             )}
           </div>
         )}
       </div>
       {cart.length > 0 && (
         <div className="drawer-footer">
+          <Separator className="mb-3.5 bg-[#ddd0bb]" />
           <div className="checkout-total">
             <span>مجموع سفارش</span>
             <Price value={total} />
           </div>
-          <button className="primary-action" onClick={onConfirm}>
+          <Button className="primary-action w-full" size="lg" onClick={onConfirm}>
             <span>
-              <Check size={18} />
+              <Check />
               تأیید نهایی سفارش
             </span>
-            <ArrowLeft size={17} />
-          </button>
+            <ArrowLeft />
+          </Button>
           <p className="checkout-note">رسید را برای ثبت در کافه به باریستا نشان دهید.</p>
         </div>
       )}
@@ -336,10 +352,10 @@ export function ReceiptView({ receipt, onClose }: { receipt: Receipt; onClose: (
         </p>
       </div>
       <div className="drawer-footer">
-        <button className="primary-action" onClick={onClose}>
+        <Button className="primary-action w-full" size="lg" onClick={onClose}>
           بازگشت به منو
-          <ArrowLeft size={17} />
-        </button>
+          <ArrowLeft />
+        </Button>
       </div>
     </>
   )

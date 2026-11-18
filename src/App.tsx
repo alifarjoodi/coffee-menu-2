@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import {
   ArrowLeft,
   ArrowUp,
@@ -10,8 +10,10 @@ import {
 } from 'lucide-react'
 import { Brand, CafeSeal, Rosette } from './components/Brand'
 import { Menu } from './components/Menu'
+import { Button } from '@/components/ui/button'
 import { Drawer } from './components/Drawer'
 import { CartView, ProductView, ReceiptView } from './components/Order'
+import { useHeroIntro, useMenuInteractions } from './hooks/motion'
 import { numberFA, type Drink, type DrinkSize } from './menu'
 import {
   MAX_QUANTITY,
@@ -85,10 +87,10 @@ function InfoView({ mode, onClose }: { mode: 'about' | 'guide'; onClose: () => v
         )}
       </div>
       <div className="drawer-footer">
-        <button className="primary-action" onClick={onClose}>
+        <Button className="primary-action w-full" size="lg" onClick={onClose}>
           بازگشت به منو
-          <ArrowLeft size={17} />
-        </button>
+          <ArrowLeft />
+        </Button>
       </div>
     </>
   )
@@ -102,6 +104,10 @@ export default function App() {
   const [product, setProduct] = useState<{ drink: Drink; size: DrinkSize; pick: number } | null>(
     null,
   )
+  const hero = useRef<HTMLElement>(null)
+  const page = useRef<HTMLDivElement>(null)
+  useHeroIntro(hero)
+  useMenuInteractions(page, '[data-magnetic]')
   useEffect(() => saveCart(cart), [cart])
   const count = cart.reduce((sum, line) => sum + line.quantity, 0)
   const show = (view: Panel) => {
@@ -155,6 +161,7 @@ export default function App() {
           </nav>
           <button
             className="order-button"
+            data-magnetic
             onClick={() => show('cart')}
             aria-label={`سفارش من، ${numberFA(count)} فنجان`}
             aria-haspopup="dialog"
@@ -167,8 +174,8 @@ export default function App() {
           </button>
         </div>
       </header>
-      <main id="top" className="page-width main-content">
-        <section className="hero" aria-labelledby="menu-title">
+      <main id="top" className="page-width main-content" ref={page}>
+        <section className="hero" aria-labelledby="menu-title" ref={hero}>
           <img
             className="hero-image"
             src="/assets/house-latte.webp"
